@@ -1,154 +1,174 @@
 package kt13_9;
+
 import java.util.ArrayList;
 import java.util.List;
-public class Kt {
-	enum AccountStatus {
-	    ACTIVE,
-	    INACTIVE,
-	    CLOSED
-	}
 
-	// INTERFACE: Tính lãi suất
-	interface Interest {
-	    double calculateInterest();
-	}
+// ENUM: Trạng thái tài khoản
+enum AccountStatus {
+    ACTIVE,
+    INACTIVE,
+    CLOSED
+}
 
-	// ABSTRACT CLASS: Tài khoản chung
-	abstract class Account implements Interest {
-	    protected String numberId;
-	    protected double balance;
-	    protected AccountStatus status;
+// INTERFACE: Tính lãi suất
+interface Interest {
+    double calculateInterest();
+}
 
-	    public Account(String numberId, double balance, AccountStatus status) {
-	        this.numberId = numberId;
-	        this.balance = balance;
-	        this.status = status;
-	    }
+// ABSTRACT CLASS: Tài khoản chung
+abstract class Account implements Interest {
+    protected String numberId;
+    protected double balance;
+    protected AccountStatus status;
 
-	    public abstract boolean withdraw(double amount);
+    public Account(String numberId, double balance, AccountStatus status) {
+        this.numberId = numberId;
+        this.balance = balance;
+        this.status = status;
+    }
 
-	    public void deposit(double amount) {
-	        if (status == AccountStatus.ACTIVE) {
-	            balance += amount;
-	        }
-	    }
+    public abstract boolean withdraw(double amount);
 
-	    public double getBalance() {
-	        return balance;
-	    }
+    public void deposit(double amount) {
+        if (status == AccountStatus.ACTIVE) {
+            balance += amount;
+        }
+    }
 
-	    public AccountStatus getStatus() {
-	        return status;
-	    }
-	}
+    public double getBalance() {
+        return balance;
+    }
 
-	// CLASS: Tài khoản tiết kiệm
-	class SavingAccount extends Account {
-	    private double interestRate;
+    public AccountStatus getStatus() {
+        return status;
+    }
 
-	    public SavingAccount(String numberId, double balance, AccountStatus status, double interestRate) {
-	        super(numberId, balance, status);
-	        this.interestRate = interestRate;
-	    }
+    public String getNumberId() {
+        return numberId;
+    }
+}
 
-	    @Override
-	    public double calculateInterest() {
-	        return balance * interestRate;
-	    }
+// CLASS: Tài khoản tiết kiệm
+class SavingAccount extends Account {
+    private double interestRate;
 
-	    @Override
-	    public boolean withdraw(double amount) {
-	        if (status == AccountStatus.ACTIVE && balance >= amount) {
-	            balance -= amount;
-	            return true;
-	        }
-	        return false;
-	    }
-	}
+    public SavingAccount(String numberId, double balance, AccountStatus status, double interestRate) {
+        super(numberId, balance, status);
+        this.interestRate = interestRate;
+    }
 
-	// CLASS: Tài khoản vãng lai
-	class CheckingAccount extends Account {
-	    private double overdraftLimit;
+    @Override
+    public double calculateInterest() {
+        return balance * interestRate;
+    }
 
-	    public CheckingAccount(String numberId, double balance, AccountStatus status, double overdraftLimit) {
-	        super(numberId, balance, status);
-	        this.overdraftLimit = overdraftLimit;
-	    }
+    @Override
+    public boolean withdraw(double amount) {
+        if (status == AccountStatus.ACTIVE && balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+}
 
-	    @Override
-	    public double calculateInterest() {
-	        return 0; 
-	    }
+// CLASS: Tài khoản vãng lai
+class CheckingAccount extends Account {
+    private double overdraftLimit;
 
-	    @Override
-	    public boolean withdraw(double amount) {
-	        if (status == AccountStatus.ACTIVE && balance + overdraftLimit >= amount) {
-	            balance -= amount;
-	            return true;
-	        }
-	        return false;
-	    }
-	}
+    public CheckingAccount(String numberId, double balance, AccountStatus status, double overdraftLimit) {
+        super(numberId, balance, status);
+        this.overdraftLimit = overdraftLimit;
+    }
 
-	class Customer {
-	    private String name;
-	    private String customerId;
-	    private String address;
-	    private List<Account> accounts;
+    @Override
+    public double calculateInterest() {
+        return 0;
+    }
 
-	    public Customer(String name, String customerId, String address) {
-	        this.name = name;
-	        this.customerId = customerId;
-	        this.address = address;
-	        this.accounts = new ArrayList<>();
-	    }
+    @Override
+    public boolean withdraw(double amount) {
+        if (status == AccountStatus.ACTIVE && balance + overdraftLimit >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+}
 
-	    public void addAccount(Account account) {
-	        accounts.add(account);
-	    }
+// CLASS: Khách hàng
+class Customer {
+    private String name;
+    private String customerId;
+    private String address;
+    private List<Account> accounts;
 
-	    public double getTotalBalance() {
-	        return accounts.stream().mapToDouble(Account::getBalance).sum();
-	    }
-	}
+    public Customer(String name, String customerId, String address) {
+        this.name = name;
+        this.customerId = customerId;
+        this.address = address;
+        this.accounts = new ArrayList<>();
+    }
 
-	// CLASS: Ngân hàng
-	class Bank {
-	    private String name;
-	    private String address;
-	    private List<Account> accounts;
+    public void addAccount(Account account) {
+        accounts.add(account);
+    }
 
-	    public Bank(String name, String address) {
-	        this.name = name;
-	        this.address = address;
-	        this.accounts = new ArrayList<>();
-	    }
+    public double getTotalBalance() {
+        return accounts.stream().mapToDouble(Account::getBalance).sum();
+    }
 
-	    public void addAccount(Account account) {
-	        accounts.add(account);
-	    }
+    public String getName() {
+        return name;
+    }
 
-	    public boolean withdraw(String numberId, double amount) {
-	        for (Account acc : accounts) {
-	            if (acc.numberId.equals(numberId)) {
-	                return acc.withdraw(amount);
-	            }
-	        }
-	        return false;
-	    }
+    public String getCustomerId() {
+        return customerId;
+    }
+}
 
-	    public void deposit(String numberId, double amount) {
-	        for (Account acc : accounts) {
-	            if (acc.numberId.equals(numberId)) {
-	                acc.deposit(amount);
-	                break;
-	            }
-	        }
-	    }
+// CLASS: Ngân hàng
+class Bank {
+    private String name;
+    private String address;
+    private List<Account> accounts;
 
-	    public double getTotalBalance() {
-	        return accounts.stream().mapToDouble(Account::getBalance).sum();
-	    }
-	}
+    public Bank(String name, String address) {
+        this.name = name;
+        this.address = address;
+        this.accounts = new ArrayList<>();
+    }
+
+    public void addAccount(Account account) {
+        accounts.add(account);
+    }
+
+    public boolean withdraw(String numberId, double amount) {
+        for (Account acc : accounts) {
+            if (acc.getNumberId().equals(numberId)) {
+                return acc.withdraw(amount);
+            }
+        }
+        return false;
+    }
+
+    public void deposit(String numberId, double amount) {
+        for (Account acc : accounts) {
+            if (acc.getNumberId().equals(numberId)) {
+                acc.deposit(amount);
+                break;
+            }
+        }
+    }
+
+    public double getTotalBalance() {
+        return accounts.stream().mapToDouble(Account::getBalance).sum();
+    }
+
+    public String getName() {
+        return name;
+    }
+}
 
 }
+
